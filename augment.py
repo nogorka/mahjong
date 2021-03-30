@@ -7,6 +7,7 @@ import cv2
 # from scipy.misc import imresize
 from time import time
 import os
+import random
 
 newpath = '.augmented/'
 
@@ -158,8 +159,8 @@ def convolution(image):
             result[y - 1, x - 1] = new_value
     return result
 
-def getAnotherSaturationImage(image, koef):
 
+def getAnotherSaturationImage(image, koef):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype("float32")
     (h, s, v) = cv2.split(hsv)
 
@@ -170,9 +171,79 @@ def getAnotherSaturationImage(image, koef):
     image = cv2.cvtColor(hsv.astype("uint8"), cv2.COLOR_HSV2BGR)
 
     return image
+
+
+from scipy.ndimage import convolve
+
+
 def getRandomBlickAtImage(image):
+    AREA = 21
+
+    cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = image[:, :, 0]
+    max_y, max_x = np.shape(image)[0], np.shape(image)[1]
+    rand_x = int(random.random() * max_x)
+    rand_y = int(random.random() * max_y)
+    rand_coord = [rand_x, rand_y]
+
+    mask = np.zeros_like(image[:, :]).astype('float32')
+
+    # make random points in AREA with value 0->1
+    mask = getWithPoints(mask, rand_coord, AREA // 2)
+    mask *= 5
+
+    # round circle
+    kernel = createRoundKernel(AREA)
+
+    mask = convolve(mask, kernel)
+    mask = cv2.GaussianBlur(mask, (AREA*2+1, AREA*2+1), 0)
+
+    new_image = addFlare(image, mask)
+    new_image = cv2.cvtColor(new_image, cv2.COLOR_GRAY2BGR)
+
+    return new_image
+
+
+def addFlare(img, flare):
+    image = np.copy(img)
+    for y in range(image.shape[0]):
+        for x in range(image.shape[1]):
+            if flare[y, x] > 0:
+                if image[y, x] + flare[y, x] > 255:
+                    image[y, x] = 255
+                else:
+                    image[y, x] += flare[y, x]
+
+                print(image[y, x], flare[y, x])
+
+    plt.imshow(image)
 
     return image
+
+
+def createRoundKernel(size):
+    r = int(size // 2)
+    quater = np.zeros((r, r))
+    for y in range(quater.shape[0]):
+        for x in range(quater.shape[1]):
+            if x ** 2 + y ** 2 < r ** 2:
+                quater[y][x] = 1
+
+    half = np.concatenate([quater[::-1], quater], axis=0)
+    k = np.concatenate([half[..., ::-1], half], axis=1)
+    return k
+
+
+def getWithPoints(img, center, area):
+    start_x = center[0] - area if center[0] - area > 0 else 0
+    end_x = center[0] + area if center[0] + area < img.shape[1] else img.shape[1]
+
+    start_y = center[1] - area if center[1] - area > 0 else 0
+    end_y = center[1] + area if center[1] + area < img.shape[0] else img.shape[0]
+
+    img[start_y:end_y, start_x:end_x] = np.random.random((area * 2, area * 2))
+
+    return img
 
 
 if __name__ == "__main__":
@@ -186,4 +257,5 @@ if __name__ == "__main__":
     # row, col, _ = image.shape
     image = getRandomBlickAtImage(image)
     augmented_df = save_au(image, augmented_df, "image")
-
+    plt.imshow(image)
+    plt.show()
