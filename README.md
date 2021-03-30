@@ -1,7 +1,8 @@
 # mahjong
 
-[ссылка на гугл док](https://docs.google.com/document/d/1V7lkHkfduTb-uHQGFfhgvOpx4yODk5_u5v73A3MzqA4/edit#)
-[ссылка на доку с теорией](https://docs.google.com/document/d/1aHAfvnS6Ofz6cwM6P9cQ_V7qlH1OirsMqvfHZ1ihgLY/edit)
+- [ссылка на общий гугл док](https://docs.google.com/document/d/1V7lkHkfduTb-uHQGFfhgvOpx4yODk5_u5v73A3MzqA4/edit#)
+
+- [ссылка на доку с теорией](https://docs.google.com/document/d/1aHAfvnS6Ofz6cwM6P9cQ_V7qlH1OirsMqvfHZ1ihgLY/edit)
 
 Аугментация:
  - [X] **геометрические преобразования** (снизу вверх)
