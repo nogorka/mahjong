@@ -24,8 +24,6 @@ class Helper(object):
         for line in self.df:
             self.images.append(cv2.imread(path + line.strip() + ".jpg"))
 
-        return self.images, self.df
-
     # read one image for testing purposes 
     def read_image(self, path, name):
         self.images.append(cv2.imread(path + ".jpg"))
@@ -41,11 +39,30 @@ class Helper(object):
         plt.imsave(path + filename, img)
         self.gen_df = self.gen_df.append({"filename": filename, "label": label}, ignore_index=True)
 
+    # save generated images and dataframe
+    def save_df(self, path):
+        # TODO
+        pass
+
+    # refresh generated data
+    def refresh(self):
+        self.gen_df = []
+        self.gen_img = []
 
 if __name__ == "__main__":
     helper = Helper()
+
     helper.read_image("images/prepared-set/Chun", "Chun")
 
-    helper.read_frame("images/prepared-set/")
+    print(helper.df[0])
+    plt.imshow(helper.images[0])
+    plt.show()
+
+    # helper.read_frame("images/prepared-set/")
+
+    # for i in range(len(helper.images)):
+    #     print(helper.df[i])
+    #     plt.imshow(helper.images[i])
+    #     plt.show()
 
     helper.save(helper.images[0], "Chun", NEW_PATH)
