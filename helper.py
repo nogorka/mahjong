@@ -39,15 +39,26 @@ class Helper(object):
         plt.imsave(path + filename, img)
         self.gen_df = self.gen_df.append({"filename": filename, "label": label}, ignore_index=True)
 
+        self.gen_df.to_csv(r'.augmented\data.csv', sep=';', index=False)
+
     # save generated images and dataframe
-    def save_df(self, path):
-        # TODO
-        pass
+    def save_df(self, labels, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        for img, label in zip(self.gen_img, labels):
+            filename = label + str(time()) + ".jpg"
+
+            plt.imsave(path + filename, img)
+            self.gen_df = self.gen_df.append({"filename": filename, "label": label}, ignore_index=True)
+
+        self.gen_df.to_csv(r'.augmented\data.csv', sep=';', index=False)
 
     # refresh generated data
     def refresh(self):
         self.gen_df = []
         self.gen_img = []
+
 
 if __name__ == "__main__":
     helper = Helper()
