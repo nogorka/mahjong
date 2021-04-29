@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-
-from helper import Helper
 from methods import *
 
 NEW_PATH = ".augmented/"
@@ -8,13 +5,14 @@ NEW_PATH = ".augmented/"
 
 class Generator(object):
 
-    def __init__(self, helper):
-        self.helper = helper
+    def __init__(self, h, p):
+        self.helper = h
+        self.path = p
 
     # use methods to create new image
     def generate(self):
-        images = []
-        labels = []
+        imgs = []
+        all_labels = []
         counter = 0
 
         print("Start generating...")
@@ -23,44 +21,52 @@ class Generator(object):
             # work with one image (label, class)
 
             # not combined methods
-            images.append(get_noised_image(img))
-            images.append(get_blurred_image(img))
+            imgs.append(get_noised_image(img))
+            imgs.append(get_blurred_image(img))
 
             for i in range(5):
-                images.append(get_random_flare_image(img, 20 + i * 2))
+                imgs.append(get_random_flare_image(img, 10 + i * 3))
 
             for i in range(5):
-                images.append(get_resized_image(img, 95 - i * 5))
+                imgs.append(get_resized_image(img, 95 - i * 5))
 
             for i in range(10):
-                images.append(get_diff_lightness_image(img, 0.95 - i * 0.05))
+                imgs.append(get_diff_lightness_image(img, 0.95 - i * 0.05))
 
-            images += get_rotated_images(img, 10)  # second: rotation degree
-            images += get_transformed_images(img, "Affine")
-            images += get_transformed_images(img, "Perspective")
+            imgs += get_rotated_images(img, 10)  # second: rotation degree
+            imgs += get_transformed_images(img, "Affine")
+            imgs += get_transformed_images(img, "Perspective")
 
             # combined methods
+            new_img = get_noised_image(img)
+            new_img = get_blurred_image(new_img)
+            for i in range(10):
+                combined_img = get_diff_lightness_image(new_img, 0.95 - i * 0.05)
+                imgs += get_transformed_images(combined_img, "Affine")
 
-            # TODO
+            new_img = get_noised_image(img)
+            new_img = get_blurred_image(new_img)
+            for i in range(10):
+                combined_img = get_random_flare_image(new_img, 10 + i * 3)
+                imgs += get_transformed_images(combined_img, "Perspective")
 
             # prepare labels for saving
-            labels += [label[:-1] for i in range(0, len(images))]
+            all_labels += [label[:-1] for _ in range(0, len(imgs))]
 
             # status bar
             counter += 1
-            print(f"Completed label: {label[:-1]} - {counter}/{len(self.helper.df)} finished")
-            if counter == 10:
-                break
+            print(f"Completed label: {label[:-1]}\t-\t{counter}/{len(self.helper.df)} finished")
 
-        helper.gen_img = images
-        helper.save_df(labels, path=NEW_PATH)
+        print("Saving...")
+        self.helper.gen_img = imgs
+        self.helper.save_df(all_labels, path=self.path)
         print("Successfully finished")
 
 
 if __name__ == "__main__":
     helper = Helper()
-    helper.read_image("images/prepared-set/Chun", "Chun")
+    helper.read_image("images/prepared-set/Chun", "Chun\n")
     # helper.read_frame("images/prepared-set/")
 
-    gen = Generator(helper)
+    gen = Generator(helper, NEW_PATH)
     gen.generate()

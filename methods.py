@@ -6,8 +6,6 @@ from helper import Helper
 from scipy.ndimage import convolve
 from scipy.ndimage.interpolation import rotate
 
-NEW_PATH = ".augmented/"
-
 
 # 1
 def get_random_flare_image(img, area):
@@ -184,6 +182,8 @@ def get_rotated_images(img, step):
 
 
 if __name__ == "__main__":
+    NEW_PATH = ".augmented/"
+
     helper = Helper()
     helper.read_image("images/prepared-set/Chun", "Chun")
 
