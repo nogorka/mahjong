@@ -37,7 +37,7 @@ def get_random_flare_image(img, area):
     new_image = add_flare(img, mask)
     new_image = cv2.cvtColor(new_image, cv2.COLOR_GRAY2BGR)
 
-    return new_image
+    return new_image.astype("uint8")
 
 
 def image_with_points(img, center, area):
@@ -47,7 +47,8 @@ def image_with_points(img, center, area):
     start_y = center[1] - area if center[1] - area > 0 else 0
     end_y = center[1] + area if center[1] + area < img.shape[0] else img.shape[0]
 
-    img[start_y:end_y, start_x:end_x] = np.random.random((area * 2, area * 2))
+    if end_y - start_y == area * 2 and end_x - start_x == area * 2:
+        img[start_y:end_y, start_x:end_x] = np.random.random((area * 2, area * 2))
 
     return img
 
@@ -85,7 +86,7 @@ def add_flare(img, flare):
 
 # 2
 def get_noised_image(img):
-    return np.random.poisson(img)
+    return np.random.poisson(img).astype('uint8')
 
 
 # 3
@@ -187,26 +188,26 @@ if __name__ == "__main__":
     helper.read_image("images/prepared-set/Chun", "Chun")
 
     image = helper.images[0]
+    images = []
 
     plt.imshow(image)
     plt.show()
 
-    # image = get_random_flare_image(image, 20)
-    # image = get_noised_image(image)
-    # image = get_resized_image(image, 25)
-    # image = get_blurred_image(image)
+    # images.append(get_random_flare_image(image, 20))
+    images.append(get_noised_image(image))
+    # images.append(get_resized_image(image, 25))
+    # images.append(get_blurred_image(image))
 
-    image = get_diff_lightness_image(image, 0.7)
+    # images.append(get_diff_lightness_image(image, 0.7))
 
     plt.imshow(image)
     plt.show()
 
-    # images = []
     # images = get_rotated_images(image, 10) # second: rotation degree
     # images = get_transformed_images(image, "Affine")
     # images = get_transformed_images(image, "Perspective")
 
-    # helper.gen_img = images
-    # labels = ["Chun" for i in range(0, len(images))]
+    helper.gen_img = images
+    labels = ["Chun" for i in range(0, len(images))]
 
-    # helper.save_df(labels, path=NEW_PATH)
+    helper.save_df(labels, path=NEW_PATH)
