@@ -75,10 +75,6 @@ def add_flare(img, flare):
                 else:
                     im[y, x] += flare[y, x]
 
-                # print(im[y, x], flare[y, x])
-
-    plt.imshow(im)
-
     return im
 
 
@@ -147,7 +143,9 @@ def get_transformed_images(img, mode="None"):
         for c in range(cols // 2, cols, cols // 5):
 
             # distortion
-            for offset_r, offset_c in zip(range(0, rows // 4, rows // 10), range(0, cols // 4, cols // 10)):
+            for offset_r, offset_c in zip(
+                    range(0, rows // 4, rows // 10),
+                    range(0, cols // 4, cols // 10)):
 
                 if mode == "Affine":
                     result.append(
@@ -210,4 +208,4 @@ if __name__ == "__main__":
     helper.gen_img = images
     labels = ["Chun" for i in range(0, len(images))]
 
-    helper.save_df(labels, path=NEW_PATH)
+    helper.save_dataset(labels, NEW_PATH)

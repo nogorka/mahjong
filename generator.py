@@ -55,18 +55,19 @@ class Generator(object):
 
             # status bar
             counter += 1
-            print(f"Completed label: {label[:-1]}\t-\t{counter}/{len(self.helper.df)} finished")
+            print(f"Completed label: {label[:-1]}\t"
+                  f"-\t{counter}/{len(self.helper.df)} finished")
 
         print("Saving...")
         self.helper.gen_img = imgs
-        self.helper.save_df(all_labels, path=self.path)
+        self.helper.save_dataset(all_labels, path=self.path)
         print("Successfully finished")
 
 
 if __name__ == "__main__":
     helper = Helper()
     helper.read_image("images/prepared-set/Chun", "Chun\n")
-    # helper.read_frame("images/prepared-set/")
+    # helper.read_dataset("images/prepared-set/")
 
     gen = Generator(helper, NEW_PATH)
     gen.generate()
