@@ -8,6 +8,107 @@ from scipy.ndimage.interpolation import rotate
 
 
 # 1
+def get_transformed_images(img, mode="None"):
+    result = []
+
+    rows, cols, _ = img.shape
+    for r in range(rows // 2, rows, rows // 5):
+        for c in range(cols // 2, cols, cols // 5):
+
+            # distortion
+            for offset_r, offset_c in zip(
+                    range(0, rows // 4, rows // 10),
+                    range(0, cols // 4, cols // 10)):
+
+                if mode == "Affine":
+                    result.append(
+                        affine_image(img, r, c, offset_r, offset_c))
+                    result.append(
+                        affine_image(rotate(img, 180), r, c, offset_r, offset_c))
+
+                if mode == "Perspective":
+                    result.append(
+                        perspective_image(img, r, c, offset_r, offset_c))
+                    result.append(
+                        perspective_image(rotate(img, 180), r, c, offset_r, offset_c))
+    return result
+
+
+def perspective_image(img, _row, _col, offset_r, offset_c):
+    rows, cols, _ = img.shape
+
+    pts1 = np.float32([
+        [offset_c, offset_r],
+        [_col + offset_c, offset_r],
+        [offset_c, _row + offset_r],
+        [_col, _row + offset_r]])
+
+    pts2 = np.float32([[0, 0], [cols, 0], [0, rows], [cols, rows]])
+
+    M = cv2.getPerspectiveTransform(pts2, pts1)
+
+    result = cv2.warpPerspective(img, M, (cols, rows))
+    return result
+
+
+def affine_image(img, _row, _col, offset_r, offset_c):
+    rows, cols, _ = img.shape
+
+    pts2 = np.float32([
+        [offset_c, offset_r],
+        [_col + offset_c, offset_r],
+        [_col, _row + offset_r]])
+
+    pts1 = np.float32([[0, 0], [cols, 0], [cols, rows]])
+
+    M = cv2.getAffineTransform(pts1, pts2)
+
+    result = cv2.warpAffine(img, M, (cols, rows))
+    return result
+
+
+# 2
+def get_diff_lightness_image(img, value):
+    hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+    (h, l, s) = cv2.split(hls)
+
+    l = np.round(l * value, decimals=0)
+    l = np.clip(l, 0, 255).astype('uint8')
+
+    hls = cv2.merge([h, l, s])
+
+    return cv2.cvtColor(hls, cv2.COLOR_HLS2BGR)
+
+
+# 3
+def get_rotated_images(img, step):
+    rotated = []
+    for i in range(10, 360, step):
+        rotated.append(rotate(img, i))
+    return rotated
+
+
+# 4
+def get_noised_image(img):
+    return np.random.poisson(img).astype('uint8')
+
+
+# 5
+def get_blurred_image(img):
+    return cv2.GaussianBlur(np.copy(img), (5, 5), 0)
+
+
+# 6
+def get_resized_image(img, scale_percent):
+    im = np.copy(img)
+
+    width = int(im.shape[1] * scale_percent / 100)
+    height = int(im.shape[0] * scale_percent / 100)
+
+    return cv2.resize(im, (width, height))
+
+
+# 7
 def get_random_flare_image(img, area):
     # area - one side in pixels
 
@@ -76,107 +177,6 @@ def add_flare(img, flare):
                     im[y, x] += flare[y, x]
 
     return im
-
-
-# 2
-def get_noised_image(img):
-    return np.random.poisson(img).astype('uint8')
-
-
-# 3
-def get_diff_lightness_image(img, value):
-    hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
-    (h, l, s) = cv2.split(hls)
-
-    l = np.round(l * value, decimals=0)
-    l = np.clip(l, 0, 255).astype('uint8')
-
-    hls = cv2.merge([h, l, s])
-
-    return cv2.cvtColor(hls, cv2.COLOR_HLS2BGR)
-
-
-# 4
-def get_blurred_image(img):
-    return cv2.GaussianBlur(np.copy(img), (5, 5), 0)
-
-
-def perspective_image(img, _row, _col, offset_r, offset_c):
-    rows, cols, _ = img.shape
-
-    pts1 = np.float32([
-        [offset_c, offset_r],
-        [_col + offset_c, offset_r],
-        [offset_c, _row + offset_r],
-        [_col, _row + offset_r]])
-
-    pts2 = np.float32([[0, 0], [cols, 0], [0, rows], [cols, rows]])
-
-    M = cv2.getPerspectiveTransform(pts2, pts1)
-
-    result = cv2.warpPerspective(img, M, (cols, rows))
-    return result
-
-
-def affine_image(img, _row, _col, offset_r, offset_c):
-    rows, cols, _ = img.shape
-
-    pts2 = np.float32([
-        [offset_c, offset_r],
-        [_col + offset_c, offset_r],
-        [_col, _row + offset_r]])
-
-    pts1 = np.float32([[0, 0], [cols, 0], [cols, rows]])
-
-    M = cv2.getAffineTransform(pts1, pts2)
-
-    result = cv2.warpAffine(img, M, (cols, rows))
-    return result
-
-
-# 5
-def get_transformed_images(img, mode="None"):
-    result = []
-
-    rows, cols, _ = img.shape
-    for r in range(rows // 2, rows, rows // 5):
-        for c in range(cols // 2, cols, cols // 5):
-
-            # distortion
-            for offset_r, offset_c in zip(
-                    range(0, rows // 4, rows // 10),
-                    range(0, cols // 4, cols // 10)):
-
-                if mode == "Affine":
-                    result.append(
-                        affine_image(img, r, c, offset_r, offset_c))
-                    result.append(
-                        affine_image(rotate(img, 180), r, c, offset_r, offset_c))
-
-                if mode == "Perspective":
-                    result.append(
-                        perspective_image(img, r, c, offset_r, offset_c))
-                    result.append(
-                        perspective_image(rotate(img, 180), r, c, offset_r, offset_c))
-    return result
-
-
-# 6
-def get_resized_image(img, scale_percent):
-    im = np.copy(img)
-
-    width = int(im.shape[1] * scale_percent / 100)
-    height = int(im.shape[0] * scale_percent / 100)
-
-    return cv2.resize(im, (width, height))
-
-
-# 7
-def get_rotated_images(img, step):
-    rotated = []
-    for i in range(10, 360, step):
-        rotated.append(rotate(img, i))
-    return rotated
 
 
 if __name__ == "__main__":
