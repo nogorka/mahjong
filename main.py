@@ -1,5 +1,5 @@
 from generator import Generator
-from methods import *
+from helper import Helper
 
 if __name__ == "__main__":
     helper = Helper()

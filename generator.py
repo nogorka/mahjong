@@ -1,3 +1,4 @@
+from helper import Helper
 from methods import *
 
 NEW_PATH = ".augmented/"
@@ -40,12 +41,11 @@ class Generator(object):
             # combined methods
             new_img = get_noised_image(img)
             new_img = get_blurred_image(new_img)
+
             for i in range(10):
                 combined_img = get_diff_lightness_image(new_img, 0.95 - i * 0.05)
                 imgs += get_transformed_images(combined_img, "Affine")
 
-            new_img = get_noised_image(img)
-            new_img = get_blurred_image(new_img)
             for i in range(10):
                 combined_img = get_random_flare_image(new_img, 10 + i * 3)
                 imgs += get_transformed_images(combined_img, "Perspective")
